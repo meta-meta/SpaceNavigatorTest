@@ -1,2 +1,1 @@
-BlankProcessingSketch
-=====================
+Testing 3dConnexion Space Navigator in Processing using ProControll library
