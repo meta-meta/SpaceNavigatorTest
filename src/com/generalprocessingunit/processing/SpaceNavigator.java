@@ -28,7 +28,7 @@ public class SpaceNavigator extends PApplet {
 
     PVector location = new PVector();
     PVector momentum = new PVector();
-    PVector orientation = new PVector();
+    Orientation orientation = new Orientation();
     PVector rotMomentum = new PVector();
 
     public void setup() {
@@ -68,9 +68,8 @@ public class SpaceNavigator extends PApplet {
 
         translate(location.x, location.y, location.z);
 
-        rotateY(orientation.y);
-        rotateX(orientation.x);
-        rotateZ(orientation.z);
+        AxisAngle aa = orientation.getOrientation();
+        rotate(aa.w, aa.x, aa.y, aa.z);
 
         fill(204, 102, 0);
         box(20, 30, 20);
@@ -93,34 +92,32 @@ public class SpaceNavigator extends PApplet {
 
     public void updateScene() {
 
-        PVector m =
-                Rotation.rotatePVectorZ(orientation.z,
-                        Rotation.rotatePVectorX(orientation.x,
-                                Rotation.rotatePVectorY(orientation.y,
-                                        new PVector(
-                                                sliderXpos.getValue() / 10,
-                                                sliderYpos.getValue() / 10,
-                                                sliderZpos.getValue() / 10
-                                        )
-                                )
-                        )
-        );
+        PVector m = PVector.add(
+                PVector.add(
+                    PVector.mult(orientation.xAxis(), sliderXpos.getValue() / 10),
+                    PVector.mult(orientation.yAxis(), sliderYpos.getValue() / 10)
+                ),
+                PVector.mult(orientation.zAxis(), sliderZpos.getValue() / 10)
+        ) ;
 
-        momentum.sub(m);
+        momentum.add(m);
 
-
-        rotMomentum.sub(
+        rotMomentum.add(
                 sliderXrot.getValue() / 10,
                 sliderYrot.getValue() / 10,
                 sliderZrot.getValue() / 10
         );
         
         location.add(momentum);
-        orientation.add(rotMomentum);
+
+        orientation.yaw(rotMomentum.y);
+        orientation.pitch(rotMomentum.x);
+        orientation.roll(rotMomentum.z);
+
 
         float drag = 0.02f;
         momentum.x = momentum.x - momentum.x * drag;
-        momentum.y = momentum.y - momentum.y * drag + 0.01f;
+        momentum.y = momentum.y - momentum.y * drag;// + 0.01f;
         momentum.z = momentum.z - momentum.z * drag;
         rotMomentum.x = rotMomentum.x - rotMomentum.x * drag;
         rotMomentum.y = rotMomentum.y - rotMomentum.y * drag;
